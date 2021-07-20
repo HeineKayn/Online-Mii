@@ -1,40 +1,72 @@
 import pygame
-from network import Network
+from _thread import *
 import pickle
 
 from pygame import locals as const
 from constantes import *
 
+from network import Network
 from menu import Menu
 from game import Game
+from player import *
 
-def main():
+class Client:
 
-    pygame.init()
-    pygame.font.init()
+    def initialize(self):
+        pygame.init()
+        pygame.font.init()
 
-    pygame.display.set_icon(pygame.image.load(CLIENT_ICON))
-    pygame.display.set_caption(CLIENT_CAPTION)
+        # pygame.display.set_icon(pygame.image.load(CLIENT_ICON))
+        pygame.display.set_caption(CLIENT_CAPTION)
 
-    clock = pygame.time.Clock()
-    ecran = pygame.display.set_mode(SCREEN_SIZE)
+        self.clock = pygame.time.Clock()
+        self.ecran = pygame.display.set_mode(SCREEN_SIZE)
+        self.network = Network()
+        self.players = Players()
 
-    # Partie Multijoueur 
-    network = Network()
-    try : 
-        player  = network.send("get")
-    except :
-        print("Echec de connexion au serveur")
-        exit()
+    def threaded_server(self,network):
+        while True:
+            try:
+                print("test")
+                # Réception des infos du joueur 
+                playerInfo = network.recv()
+                print(playerInfo)
 
-    # Interfaces
-    menu = Menu(ecran,clock,player)
-    menu.start()
+                if not playerInfo:
+                    break
+                else:
+                    # Si on reçoit un truc c'est les infos d'un joueur qui a été update ou ajouté
+                    if playerInfo.id in self.players.list:
+                        self.players.modify(playerInfo)
+                    else:
+                        self.players.add(playerInfo)
+            except:
+                pass
 
-    jeu = Game(ecran,clock,player)
-    jeu.start()
+    def run(self):
+        
+        try : 
+            self.playerInfo  = self.network.ask("get")
+        except Exception as e:
+            print("Echec de connexion au serveur : ",e)
+            exit()
 
-    pygame.quit()
+        self.players.add(self.playerInfo)
+        self.players.list[self.network.playerId].ecran = self.ecran
+        print(self.players)
 
-if __name__ == '__client__':
-    main()
+        # Interfaces
+        menu = Menu(self.ecran,self.clock,self.network,self.players)
+        menu.start()
+
+        jeu = Game(self.ecran,self.clock,self.network,self.players)
+        jeu.start()
+
+        pygame.quit()
+
+###########
+
+client = Client()
+client.initialize()
+start_new_thread(client.threaded_server,(client.network,))
+client.run()

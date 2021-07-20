@@ -1,16 +1,20 @@
 import pygame
+import pickle
 from pygame import locals as const
+
+from player import *
 from constantes import *
 
 class Game:
-    def __init__(self, ecran, clock, network, player):
+    def __init__(self, ecran, clock, network, players):
         self.ecran = ecran
         self.clock = clock
         self.continuer = True
         self.bg = pygame.image.load(BG_TEXTURE)
 
         self.network = network
-        self.player = player
+        self.players = players
+        self.main_player = self.players.list[self.network.playerId]
     
     def prepare(self):
         pygame.key.set_repeat(1, 0)
@@ -18,9 +22,13 @@ class Game:
     
     def update_screen(self):
         self.ecran.blit(self.bg, (0, 0))
+        self.players.render() 
 
     def update_game(self):
-        pass
+        has_changed = self.main_player.update()
+
+        if has_changed :
+            self.network.send(self.main_player.info)
     
     def process_event(self, event: pygame.event):
 
@@ -28,18 +36,16 @@ class Game:
         # if event.type == const.MOUSEBUTTONUP and event.button == 1:
         #     self.projectiles.destroy(event.pos)
 
-        # Déplacement
-        # -- if keydown and event.key is in (liste touches possible)
-        # il se passe quoi si 2 touches mm temps ?
-        if event.type == const.KEYDOWN and event.key == const.K_a:
-            self.player.move(event.pos)
-            self.network.send(self.player)
+        # Le déplacement se fait directement dans Player
 
         if event.type == const.QUIT:
             self.continuer = False
     
     def start(self):
         self.prepare()
+
+        # On spawn le joueur
+        self.network.send(self.main_player.info)
         
         while self.continuer:
             for event in pygame.event.get():

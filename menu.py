@@ -1,19 +1,25 @@
 import pygame
 import pickle
-
 from pygame import locals as const
+
+from player import *
 from constantes import *
 
 class Menu():
 
-    def __init__(self, ecran, clock, network, player):
+    def __init__(self, ecran, clock, network, players):
         self.ecran = ecran
         self.clock = clock
         self.continuer = True
         self.bg = pygame.image.load(BG_TEXTURE)
 
         self.network = network
-        self.player = player
+        self.players = players
+
+        self.player = self.players.list[self.network.playerId]
+        self.player.info.name = "Deltix"
+        self.player.info.color = BLUE
+        self.players.list[self.network.playerId] = self.player
 
     def render(self):
         self.ecran.blit(self.bg, (0, 0))
