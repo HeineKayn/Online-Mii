@@ -27,10 +27,9 @@ class Client:
     def threaded_server(self,network):
         while True:
             try:
-                print("test")
                 # Réception des infos du joueur 
-                playerInfo = network.recv()
-                print(playerInfo)
+                playerInfo = network.receive()
+                print("Recu : ",playerInfo)
 
                 if not playerInfo:
                     break
@@ -40,8 +39,9 @@ class Client:
                         self.players.modify(playerInfo)
                     else:
                         self.players.add(playerInfo)
-            except:
-                pass
+            except :
+                break
+        print("Connexion terminée")
 
     def run(self):
         

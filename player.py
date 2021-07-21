@@ -12,6 +12,8 @@ class PlayerInfo():
         self.name = name
         self.color = color
 
+        self.connected = True
+
     def __str__ (self):
         return "Joueur {}, {} ".format(self.id,self.pos)
 
@@ -19,7 +21,6 @@ class Player():
 
     def __init__(self,playerInfo=None):
         self.info = playerInfo
-        self.connected = True
 
     def __str__ (self):
         return str(self.info)
@@ -45,7 +46,7 @@ class Players():
             string += str(info)
         return string
 
-    def modifiy(self,playerInfo):
+    def modify(self,playerInfo):
         # Si l'attribut connecté est vrai alors on update sinon on supprime
         if playerInfo.connected :
             self.list[playerInfo.id].info = playerInfo
