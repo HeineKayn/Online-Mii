@@ -46,6 +46,10 @@ class Server:
         # A l'établissement de la connexion, on envoie le numéro du joueur
         conn.send(str.encode(str(playerId)))
 
+        # On lui envoie les infos sur tous les autres joueurs
+        for i, playerInfo in self.playerInfos.items():
+            conn.sendall(pickle.dumps(playerInfo))
+
         while True:
             try:
                 # Réception des infos du joueur 
@@ -68,14 +72,22 @@ class Server:
                         self.playerInfos[playerId] = data
 
                         # On envoie à tous le monde le joueur qui à été modifié
-                        for playerId, playerInfo in self.playerInfos.items():
-                            self.conns[playerId].sendall(pickle.dumps(self.playerInfos[playerId]))
+                        for i, playerInfo in self.playerInfos.items():
+                            self.conns[i].sendall(pickle.dumps(self.playerInfos[playerId]))
 
             except :
                 break
 
         print("Connexion perdue")
         try:
+            # On lui mets l'attribut disant qu'il a déco
+            self.playerInfos[playerId].connected = False
+
+            # Puis on envoie l'info à tout le monde
+            # for i, playerInfo in self.playerInfos.items():
+            #     self.conns[i].sendall(pickle.dumps(self.playerInfos[playerId]))
+
+            # Puis on le supprime de la liste du serveur
             del self.playerInfos[playerId]
             print("Fermeture d'un client", playerId)
         except:

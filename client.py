@@ -38,7 +38,7 @@ class Client:
                     if playerInfo.id in self.players.list:
                         self.players.modify(playerInfo)
                     else:
-                        self.players.add(playerInfo)
+                        self.players.add(playerInfo,self.ecran)
             except :
                 break
         print("Connexion terminée")
@@ -51,8 +51,7 @@ class Client:
             print("Echec de connexion au serveur : ",e)
             exit()
 
-        self.players.add(self.playerInfo)
-        self.players.list[self.network.playerId].ecran = self.ecran
+        self.players.add(self.playerInfo,self.ecran)
         print(self.players)
 
         # Interfaces

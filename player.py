@@ -53,8 +53,10 @@ class Players():
         else :
             self.list.pop(playerInfo.id)
 
-    def add(self,playerInfo):
-        self.list[playerInfo.id] = Player(playerInfo)
+    def add(self,playerInfo,ecran):
+        player = Player(playerInfo)
+        player.ecran = ecran
+        self.list[playerInfo.id] = player
 
 # ------
 
