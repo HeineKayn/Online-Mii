@@ -21,7 +21,6 @@ class Client:
 
         self.clock = pygame.time.Clock()
         self.ecran = pygame.display.set_mode(SCREEN_SIZE)
-        self.network = Network()
         self.players = Players()
 
     def threaded_server(self,network):
@@ -43,21 +42,37 @@ class Client:
                 break
         print("Connexion terminée")
 
-    def run(self):
-        
+    def connect(self):
+        self.network = Network()
+        start_new_thread(client.threaded_server,(self.network,))
+
         try : 
-            self.playerInfo  = self.network.ask("get")
+            return self.network.ask("get")
         except Exception as e:
             print("Echec de connexion au serveur : ",e)
             exit()
 
+    def run(self):
+        
+        # Creation du personnage
+        menu = Menu(self.ecran,self.clock)
+        menu.start()
+        created_info = menu.get_player_info()
+
+        # Connexion au serveur
+        self.playerInfo = self.connect()
+
+        # On modifie les infos reçues et on renvoie
+        created_info.id  = self.playerInfo.id
+        created_info.pos = self.playerInfo.pos
+        self.playerInfo  = created_info
+        self.network.send(self.playerInfo)
+
+        # On rajoute à la liste des joueurs présents
         self.players.add(self.playerInfo,self.ecran)
         print(self.players)
 
-        # Interfaces
-        menu = Menu(self.ecran,self.clock,self.network,self.players)
-        menu.start()
-
+        # Lancement du jeu
         jeu = Game(self.ecran,self.clock,self.network,self.players)
         jeu.start()
 
@@ -67,5 +82,5 @@ class Client:
 
 client = Client()
 client.initialize()
-start_new_thread(client.threaded_server,(client.network,))
+# start_new_thread(client.threaded_server,(client.network,))
 client.run()

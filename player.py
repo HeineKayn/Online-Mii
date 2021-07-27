@@ -6,7 +6,7 @@ import controles
 
 class PlayerInfo():
 
-    def __init__(self, playerId, pos, name="", color=BLACK):
+    def __init__(self, playerId, pos, name="Deltix", color=BLACK):
         self.id = playerId
         self.pos = pos
         self.name = name
@@ -14,13 +14,17 @@ class PlayerInfo():
 
         self.connected = True
 
+    def modify(self,name,color):
+        pass
+
     def __str__ (self):
-        return "Joueur {}, {} ".format(self.id,self.pos)
+        return "Joueur '{}':{} en {} -> {}".format(self.name,self.id,self.pos,self.color)
 
 class Player():
 
-    def __init__(self,playerInfo=None):
+    def __init__(self,playerInfo=None,ecran=None):
         self.info = playerInfo
+        self.ecran = ecran
 
     def __str__ (self):
         return str(self.info)
@@ -54,8 +58,7 @@ class Players():
             self.list.pop(playerInfo.id)
 
     def add(self,playerInfo,ecran):
-        player = Player(playerInfo)
-        player.ecran = ecran
+        player = Player(playerInfo,ecran)
         self.list[playerInfo.id] = player
 
 # ------

@@ -26,6 +26,27 @@ BLACK 	= (0, 0, 0)
 GRAY 	= (150, 150, 150)
 WHITE 	= (255, 255, 255)
 
+LIGHT_GRAY 	= (200, 200, 200)
+
+COLOR_LIST = [RED,GREEN,BLUE,YELLOW,MAGENTA,CYAN,BLACK]
+
+# --- MENU ---
+
+SELECTOR_SIZE = (500,200)
+ARROW_TEXTURE = "ressources/textures/arrow.png"
+ARROW_SIZE    = (100,60)
+SELECTOR_TEXT_SIZE = 30
+
+CONFIRM_SIZE  	 = (140,80)
+CONFIRM_TEXTURE  = "ressources/textures/confirm.png"
+
+INPUT_SIZE    	 = (300,80)
+INPUT_TEXTURE 	 = "ressources/textures/input.png"
+INPUT_TEXT_SIZE  = 34
+INPUT_TEXT_COLOR = WHITE
+INPUT_TEXT_COLOR_UNFOCUS = LIGHT_GRAY
+INPUT_PADDING    = 20
+
 # --- CONTROLES ---
 
 PLAYER_SPEED = 5
@@ -36,3 +57,4 @@ BAS 	= const.K_s
 DROITE 	= const.K_d
 
 CONTROLE_LIST = [HAUT, GAUCHE, BAS, DROITE]
+

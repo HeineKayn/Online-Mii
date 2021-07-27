@@ -84,11 +84,13 @@ class Server:
             self.playerInfos[playerId].connected = False
 
             # Puis on envoie l'info à tout le monde
-            # for i, playerInfo in self.playerInfos.items():
-            #     self.conns[i].sendall(pickle.dumps(self.playerInfos[playerId]))
+            for i, playerInfo in self.playerInfos.items():
+                if i != playerId :
+                    self.conns[i].sendall(pickle.dumps(self.playerInfos[playerId]))
 
             # Puis on le supprime de la liste du serveur
             del self.playerInfos[playerId]
+            del self.conns[playerId]
             print("Fermeture d'un client", playerId)
         except:
             pass

@@ -5,34 +5,58 @@ from pygame import locals as const
 from player import *
 from constantes import *
 
+from selector import *
+from input import *
+from button import *
+
 class Menu():
 
-    def __init__(self, ecran, clock, network, players):
+    def __init__(self, ecran, clock):
         self.ecran = ecran
         self.clock = clock
         self.continuer = True
         self.bg = pygame.image.load(BG_TEXTURE)
 
-        self.network = network
-        self.players = players
+        self.player = Player(PlayerInfo(0,(WIDTH//2,HEIGHT//2 - 100)),self.ecran)
+        self.init_hud()
 
-        self.player = self.players.list[self.network.playerId]
-        self.player.info.name = "Deltix"
-        self.player.info.color = BLUE
-        self.players.list[self.network.playerId] = self.player
+    def init_hud(self):
+        hud_pos = [WIDTH//2,HEIGHT//2 + 20]
+        margin  = 100
+
+        self.selectors = Selectors(self.ecran)
+        self.selectors.add("color",COLOR_LIST,hud_pos)
+        self.input = Input(self.ecran,[hud_pos[0],hud_pos[1]+margin])
+        self.confirm = Button(self.ecran,[hud_pos[0],hud_pos[1]+margin*2])
 
     def render(self):
         self.ecran.blit(self.bg, (0, 0))
-        font = pygame.font.SysFont("comicsans", 80)
-        text = font.render("Appuyer sur une touche", 1, (255,0,0), True)
-        self.ecran.blit(text, (WIDTH/2 - text.get_width()/2, HEIGHT/2 - text.get_height()/2))
+        self.player.render()
+        self.selectors.render()
+        self.input.render()
+        self.confirm.render()
 
     def process_event(self):
         for event in pygame.event.get():
+
+            # Si clique sur fermer
             if event.type == const.QUIT :
                 exit()
+
+            # Si clique gauche
+            if event.type == const.MOUSEBUTTONUP and event.button == 1:
+
+                if self.confirm.collide(event.pos) :
+                    self.modify_player_info()
+                    self.continuer = 0
+
+                else :
+                    self.selectors.collide(event.pos)
+                    self.input.collide(event.pos)
+                    self.modify_player_info()
+
             if event.type == const.KEYDOWN:
-                self.continuer = 0
+                self.input.process_key(event)
 
     def start(self):
         while self.continuer:
@@ -40,3 +64,12 @@ class Menu():
             self.render()
             pygame.display.flip()    
             self.clock.tick(60)
+
+    ###### Interface
+
+    def modify_player_info(self):
+        self.player.info.color = self.selectors.list["color"].get_selected()
+        self.player.info.name  = self.input.text
+
+    def get_player_info(self):
+        return self.player.info
