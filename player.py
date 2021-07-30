@@ -2,11 +2,13 @@ import pygame
 from pygame import locals as const
 from constantes import *
 
+from random import randint
+
 import controles
 
 class PlayerInfo():
 
-    def __init__(self, playerId, pos, name="Deltix", color=BLACK):
+    def __init__(self, playerId, pos=[randint(0,WIDTH),randint(0,HEIGHT)], name="", color=BLACK):
         self.id = playerId
         self.pos = pos
         self.name = name
@@ -26,12 +28,33 @@ class Player():
         self.info = playerInfo
         self.ecran = ecran
 
+        self.old_pos = None
+        self.text_image = None
+        self.font = pygame.font.SysFont(None,PLAYER_FONT_SIZE)
+
+        self.update_name(True)
+
     def __str__ (self):
         return str(self.info)
+
+    def update_name(self,force=False):
+        if self.old_pos or force:
+            if self.info.name :
+                if self.old_pos != self.info.pos or force :
+                    self.text_image = self.font.render(self.info.name, True, PLAYER_FONT_COLOR)
+                    self.text_rect  = self.text_image.get_rect()
+                    self.text_rect  = [self.info.pos[0] - self.text_rect.width//2,self.info.pos[1] - self.text_rect.height//2 - 20]
+        self.old_pos = self.info.pos
 
     def render(self):
         # self.ecran.blit(self.image, self.pos)
         pygame.draw.circle(self.ecran,self.info.color,self.info.pos,5)
+
+        if self.text_image : 
+            self.ecran.blit(self.text_image, self.text_rect)
+
+    def random_pos(self):
+        self.info.pos = [randint(0,WIDTH),randint(0,HEIGHT)]
 
     def update(self):
         self.vect = controles.movement()
@@ -67,3 +90,6 @@ class Players():
         for idPlayer, player in self.list.items():
             player.render()
 
+    def update(self):
+        for idPlayer, player in self.list.items():
+            player.update_name()

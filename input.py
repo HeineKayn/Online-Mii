@@ -12,6 +12,7 @@ class Input:
 
         self.text_color = INPUT_TEXT_COLOR_UNFOCUS
         self.focus = False
+        self.first_focus = False
 
         self.image = pygame.image.load(INPUT_TEXTURE)
         self.image = pygame.transform.scale(self.image,INPUT_SIZE)
@@ -49,18 +50,24 @@ class Input:
             else:
                 if len(self.text)==0:
                     self.text = self.text.capitalize()
-                self.text += event.unicode
+                if len(self.text) < PLAYER_NAME_MAX_LEN : 
+                    self.text += event.unicode
             self.update()
 
     def collide(self,pos):
         self.focus = self.hitbox.collidepoint(pos)
+        if self.focus and not self.first_focus : 
+            self.text = ""
+            self.first_focus = True
+
         self.update()
         return self.focus
 
     def render(self):
         self.ecran.blit(self.image, self.hitbox)
         self.ecran.blit(self.text_image, self.text_rect)
-        if time.time() % 1 > 0.5:
+
+        if time.time() % 1 > 0.5 and self.focus:
             pygame.draw.rect(self.ecran, self.text_color, self.cursor)
 
         # pygame.draw.rect(self.ecran,GREEN,self.hitbox,1)

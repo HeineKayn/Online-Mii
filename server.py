@@ -1,7 +1,6 @@
 import socket
 from _thread import *
 import pickle
-from random import randint
 
 from player import *
 from constantes import *
@@ -31,10 +30,7 @@ class Server:
         while True:
             conn, addr = self.socket.accept()
             self.conns[self.clientCount] = conn
-            print("Connected to :", addr)
-
-            start_pos = [randint(0,WIDTH),randint(0,HEIGHT)]
-            self.playerInfos[self.clientCount] = PlayerInfo(self.clientCount,start_pos)
+            print("Connected to : {}, id={}".format(addr,self.clientCount))
 
             start_new_thread(self.threaded_client, (conn, self.clientCount))
             self.clientCount += 1
@@ -67,7 +63,7 @@ class Server:
                     if data == "get":
                         conn.sendall(pickle.dumps(self.playerInfos[playerId]))
 
-                    # Si on recoit des données c'est qu'on veut modifier le joueur qui l'a envoyé
+                    # Si on recoit des données joueur c'est qu'on veut modifier le joueur qui l'a envoyé
                     else :
                         self.playerInfos[playerId] = data
 

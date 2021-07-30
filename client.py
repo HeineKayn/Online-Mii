@@ -28,7 +28,6 @@ class Client:
             try:
                 # Réception des infos du joueur 
                 playerInfo = network.receive()
-                print("Recu : ",playerInfo)
 
                 if not playerInfo:
                     break
@@ -46,26 +45,25 @@ class Client:
         self.network = Network()
         start_new_thread(client.threaded_server,(self.network,))
 
-        try : 
-            return self.network.ask("get")
-        except Exception as e:
-            print("Echec de connexion au serveur : ",e)
-            exit()
+        # try : 
+        #     return self.network.ask("get")
+        # except Exception as e:
+        #     print("Echec de connexion au serveur : ",e)
+        #     exit()
+
 
     def run(self):
         
         # Creation du personnage
         menu = Menu(self.ecran,self.clock)
         menu.start()
-        created_info = menu.get_player_info()
+        self.playerInfo = menu.get_player_info()
 
-        # Connexion au serveur
-        self.playerInfo = self.connect()
+        # Connexion
+        self.connect()
 
         # On modifie les infos reçues et on renvoie
-        created_info.id  = self.playerInfo.id
-        created_info.pos = self.playerInfo.pos
-        self.playerInfo  = created_info
+        self.playerInfo.id = self.network.playerId
         self.network.send(self.playerInfo)
 
         # On rajoute à la liste des joueurs présents

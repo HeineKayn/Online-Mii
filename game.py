@@ -15,6 +15,7 @@ class Game:
         self.network = network
         self.players = players
         self.main_player = self.players.list[self.network.playerId]
+        self.main_player.random_pos()
     
     def prepare(self):
         pygame.key.set_repeat(1, 0)
@@ -26,6 +27,7 @@ class Game:
 
     def update_game(self):
         has_changed = self.main_player.update()
+        self.players.update()
 
         if has_changed :
             self.network.send(self.main_player.info)

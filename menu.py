@@ -17,7 +17,7 @@ class Menu():
         self.continuer = True
         self.bg = pygame.image.load(BG_TEXTURE)
 
-        self.player = Player(PlayerInfo(0,(WIDTH//2,HEIGHT//2 - 100)),self.ecran)
+        self.player = Player(PlayerInfo(0,[WIDTH//2,HEIGHT//2 - 100]),self.ecran)
         self.init_hud()
 
     def init_hud(self):
@@ -57,6 +57,8 @@ class Menu():
 
             if event.type == const.KEYDOWN:
                 self.input.process_key(event)
+                self.modify_player_info()
+                self.player.update_name(True) # on force l'update de l'affichage du nom
 
     def start(self):
         while self.continuer:
