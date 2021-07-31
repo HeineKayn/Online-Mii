@@ -1,6 +1,7 @@
 import pygame
 from _thread import *
 import pickle
+from time import sleep
 
 from pygame import locals as const
 from constantes import *
@@ -40,6 +41,10 @@ class Client:
             except :
                 break
         print("Connexion terminée")
+
+        # print("Tentative de reconnexion dans 3 secondes")
+        # sleep(3)
+        # self.connect()
 
     def connect(self):
         self.network = Network()

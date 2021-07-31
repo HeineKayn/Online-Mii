@@ -3,6 +3,7 @@ from pygame import locals as const
 from constantes import *
 
 from random import randint
+from math import floor
 
 import controles
 
@@ -29,13 +30,81 @@ class Player():
         self.ecran = ecran
 
         self.old_pos = None
+        self.state = PLAYER_IDLE
+        self.old_state = PLAYER_IDLE
+        self.anim_count = 0
+        self.init_sprites()
+
         self.text_image = None
         self.font = pygame.font.SysFont(None,PLAYER_FONT_SIZE)
-
+        self.decalage_pseudo = 80
         self.update_name(True)
 
     def __str__ (self):
         return str(self.info)
+
+    def random_pos(self):
+        self.info.pos = [randint(0,WIDTH),randint(0,HEIGHT)]
+
+    def update_color(self):
+        for i,sublist in self.sprites.items() :
+            for j,image in enumerate(sublist) : 
+                new_img = pygame.PixelArray(image)
+                new_img.replace(BLACK, self.info.color)
+                self.sprites[i][j] = new_img.surface
+
+    def init_sprites(self):
+        self.sprites = {}
+        self.sprites[PLAYER_IDLE]     = [pygame.image.load(ANIMATION_TEXTURE_IDLE)]
+        self.sprites[PLAYER_FORWARD]  = self.sprites[PLAYER_IDLE] + [pygame.image.load(ANIMATION_TEXTURE_FORWARD.format(1)),pygame.image.load(ANIMATION_TEXTURE_FORWARD.format(2))]
+        self.sprites[PLAYER_BACKWARD] = self.sprites[PLAYER_IDLE] + [pygame.image.load(ANIMATION_TEXTURE_BACKWARD.format(1)),pygame.image.load(ANIMATION_TEXTURE_BACKWARD.format(2))]
+        self.sprites[PLAYER_LATERALE] = self.sprites[PLAYER_IDLE] + [pygame.image.load(ANIMATION_TEXTURE_LATERALE.format(1)),pygame.image.load(ANIMATION_TEXTURE_LATERALE.format(2))]
+        self.sprites[PLAYER_IDLE]     = [pygame.image.load(ANIMATION_TEXTURE_IDLE)] * 3
+        
+        self.update_color()
+        self.current_sprite = self.sprites[PLAYER_IDLE]
+
+    # AFFICHAGE
+    def render_pseudo(self):
+        if self.text_image : 
+            self.ecran.blit(self.text_image, self.text_rect)
+
+    def animate(self):
+        self.current_sprite = self.sprites[self.state][floor(self.anim_count)]
+        self.anim_count += ANIMATION_FRAMERATE 
+
+        # On change d'animations ou on a dépassé le nombre d'animation existante
+        if self.old_state != self.state or floor(self.anim_count) >= len(self.sprites[self.state]) :
+            self.anim_count = 0
+
+        self.old_state = self.state
+        self.rec_sprite = self.current_sprite.get_rect()
+        self.pos_sprite = [self.info.pos[0] - self.rec_sprite.width//2, self.info.pos[1] - self.rec_sprite.height//2]
+        self.rec_sprite.topleft = self.pos_sprite
+
+        self.ecran.blit(self.current_sprite, self.pos_sprite)
+        # pygame.draw.rect(self.ecran,RED,self.rec_sprite,1)
+
+    def render(self):
+        # pygame.draw.circle(self.ecran,self.info.color,self.info.pos,5)
+        self.animate()
+        self.render_pseudo()     
+
+    # MISE à JOUR
+
+    def update_state(self):
+        if self.vect == [0,0] : 
+            self.state = PLAYER_IDLE
+
+        else : 
+            if self.vect[1] > 0 : 
+                self.state = PLAYER_FORWARD
+
+            elif self.vect[1] < 0 :
+                self.state = PLAYER_BACKWARD
+
+            else :
+                self.state = PLAYER_LATERALE
 
     def update_name(self,force=False):
         if self.old_pos or force:
@@ -43,18 +112,10 @@ class Player():
                 if self.old_pos != self.info.pos or force :
                     self.text_image = self.font.render(self.info.name, True, PLAYER_FONT_COLOR)
                     self.text_rect  = self.text_image.get_rect()
-                    self.text_rect  = [self.info.pos[0] - self.text_rect.width//2,self.info.pos[1] - self.text_rect.height//2 - 20]
+                    self.text_rect  = [self.info.pos[0] - self.text_rect.width//2,self.info.pos[1] - self.text_rect.height//2 - self.decalage_pseudo]
         self.old_pos = self.info.pos
 
-    def render(self):
-        # self.ecran.blit(self.image, self.pos)
-        pygame.draw.circle(self.ecran,self.info.color,self.info.pos,5)
-
-        if self.text_image : 
-            self.ecran.blit(self.text_image, self.text_rect)
-
-    def random_pos(self):
-        self.info.pos = [randint(0,WIDTH),randint(0,HEIGHT)]
+    # SEULEMENT POUR JOUEUR PRINCIPALE
 
     def update(self):
         self.vect = controles.movement()
@@ -93,3 +154,4 @@ class Players():
     def update(self):
         for idPlayer, player in self.list.items():
             player.update_name()
+            player.update_state()
