@@ -14,6 +14,7 @@ class PlayerInfo():
         self.pos = pos
         self.name = name
         self.color = color
+        self.vect = [0,0]
 
         self.connected = True
 
@@ -33,11 +34,12 @@ class Player():
         self.state = PLAYER_IDLE
         self.old_state = PLAYER_IDLE
         self.anim_count = 0
+        # self.anim_lock  = False
         self.init_sprites()
 
         self.text_image = None
         self.font = pygame.font.SysFont(None,PLAYER_FONT_SIZE)
-        self.decalage_pseudo = 80
+        self.decalage_pseudo = 50
         self.update_name(True)
 
     def __str__ (self):
@@ -46,12 +48,23 @@ class Player():
     def random_pos(self):
         self.info.pos = [randint(0,WIDTH),randint(0,HEIGHT)]
 
-    def update_color(self):
+    def update_color(self,init=False):
         for i,sublist in self.sprites.items() :
             for j,image in enumerate(sublist) : 
                 new_img = pygame.PixelArray(image)
-                new_img.replace(BLACK, self.info.color)
-                self.sprites[i][j] = new_img.surface
+
+                # Si c'est à l'init, le sprite de base est forcément noir
+                if init :
+                    new_img.replace(BLACK, self.info.color)
+                # Sinon ça pouvait être n'importe quelle couleur avant
+                else :
+                    for color in COLOR_LIST :
+                        new_img.replace(color, self.info.color)
+
+                # CHANGEMENT DE TAILLE
+                new_img = new_img.surface
+                new_img = pygame.transform.scale(new_img,[30,60]) 
+                self.sprites[i][j] = new_img
 
     def init_sprites(self):
         self.sprites = {}
@@ -61,7 +74,7 @@ class Player():
         self.sprites[PLAYER_LATERALE] = self.sprites[PLAYER_IDLE] + [pygame.image.load(ANIMATION_TEXTURE_LATERALE.format(1)),pygame.image.load(ANIMATION_TEXTURE_LATERALE.format(2))]
         self.sprites[PLAYER_IDLE]     = [pygame.image.load(ANIMATION_TEXTURE_IDLE)] * 3
         
-        self.update_color()
+        self.update_color(init=True)
         self.current_sprite = self.sprites[PLAYER_IDLE]
 
     # AFFICHAGE
@@ -69,12 +82,11 @@ class Player():
         if self.text_image : 
             self.ecran.blit(self.text_image, self.text_rect)
 
-    def animate(self):
+    def play_animation(self):
         self.current_sprite = self.sprites[self.state][floor(self.anim_count)]
         self.anim_count += ANIMATION_FRAMERATE 
 
-        # On change d'animations ou on a dépassé le nombre d'animation existante
-        if self.old_state != self.state or floor(self.anim_count) >= len(self.sprites[self.state]) :
+        if floor(self.anim_count) >= len(self.sprites[self.state]) :
             self.anim_count = 0
 
         self.old_state = self.state
@@ -83,6 +95,17 @@ class Player():
         self.rec_sprite.topleft = self.pos_sprite
 
         self.ecran.blit(self.current_sprite, self.pos_sprite)
+
+    def reset_animation(self):
+        self.current_sprite = self.sprites[PLAYER_IDLE][0]
+        self.anim_count = 0
+
+    def animate(self):
+        if self.old_state != self.state :
+            self.reset_animation()
+            
+        self.play_animation()
+
         # pygame.draw.rect(self.ecran,RED,self.rec_sprite,1)
 
     def render(self):
@@ -93,14 +116,14 @@ class Player():
     # MISE à JOUR
 
     def update_state(self):
-        if self.vect == [0,0] : 
+        if self.info.vect == [0,0] : 
             self.state = PLAYER_IDLE
 
         else : 
-            if self.vect[1] > 0 : 
+            if self.info.vect[1] > 0 : 
                 self.state = PLAYER_FORWARD
 
-            elif self.vect[1] < 0 :
+            elif self.info.vect[1] < 0 :
                 self.state = PLAYER_BACKWARD
 
             else :
@@ -118,10 +141,10 @@ class Player():
     # SEULEMENT POUR JOUEUR PRINCIPALE
 
     def update(self):
-        self.vect = controles.movement()
-        self.info.pos[0] = self.info.pos[0] + self.vect[0]*PLAYER_SPEED
-        self.info.pos[1] = self.info.pos[1] + self.vect[1]*PLAYER_SPEED
-        return self.vect != [0,0]
+        self.info.vect = controles.movement()
+        self.info.pos[0] = self.info.pos[0] + self.info.vect[0]*PLAYER_SPEED
+        self.info.pos[1] = self.info.pos[1] + self.info.vect[1]*PLAYER_SPEED
+        return self.info.vect != [0,0]
 
 class Players():
 

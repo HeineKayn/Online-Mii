@@ -54,7 +54,7 @@ class Menu():
                     self.selectors.collide(event.pos)
                     self.input.collide(event.pos)
                     self.modify_player_info()
-                    self.player.update_color()
+                    self.player.init_sprites()
 
             if event.type == const.KEYDOWN:
                 self.input.process_key(event)
